@@ -1,0 +1,6 @@
+{
+  "name": "CHOPWIZE — Intelligent Food Decisions",
+  "description": "Premium Nigerian food-tech application for smart food discovery, ordering, meal timetables, food budgeting, restaurant operations, and rider dispatch.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

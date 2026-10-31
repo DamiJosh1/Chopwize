@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  --color-plum: #30102F;
+  --color-plum-hover: #220b22;
+  --color-plum-light: #491a47;
+  --color-plum-tint: #FAF3F9;
+  
+  --color-gold: #CBB477;
+  --color-gold-hover: #B8A063;
+  --color-gold-light: #EFE7D3;
+  --color-gold-tint: #FDFBF7;
+
+  --color-ivory: #FAF8F4;
+  --color-dark: #242124;
+  --color-secondary: #716B71;
+  --color-app-border: #EAE5E9;
+
+  --color-semantic-success: #287A55;
+  --color-semantic-warning: #9A6A18;
+  --color-semantic-error: #B33B43;
+  --color-semantic-info: #49627A;
+}
+
+:root {
+  font-family: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #242124;
+  background-color: #FAF8F4;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Tabular figures for prices, tables and metrics */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Safe area support for mobile devices */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Custom scrollbars that stay quiet and refined */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #EAE5E9;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #CBB477;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
