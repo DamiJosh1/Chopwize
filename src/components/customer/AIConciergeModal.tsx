@@ -18,6 +18,8 @@ export const AIConciergeModal: React.FC = () => {
     aiConciergeInitialQuery,
     menuItems,
     addToCart,
+    customerName,
+    aiRules,
     showToast,
   } = useApp();
 
@@ -25,14 +27,15 @@ export const AIConciergeModal: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [replyMessage, setReplyMessage] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<ConciergeRecommendation[]>([]);
+  const [isGroceryIntent, setIsGroceryIntent] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const sampleChips = [
     'Spicy jollof with goat meat under ₦4,500',
+    'Yoruba food near me: Amala and ewedu',
+    'I need spaghetti, noodles and vegetable oil',
     'Comforting swallow and native soup for dinner',
-    'Light meal or grill after workout',
-    'Quick lunch under ₦3,000 in Lekki',
-    'Late night suya platter with zobo cooler'
+    'Light meal or grill after workout'
   ];
 
   useEffect(() => {
@@ -54,18 +57,24 @@ export const AIConciergeModal: React.FC = () => {
     setErrorMsg(null);
 
     try {
+      const activeRuleTexts = aiRules.filter((r) => r.isActive).map((r) => r.text);
       const res = await fetch('/api/ai/concierge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: queryText.trim() }),
+        body: JSON.stringify({
+          prompt: queryText.trim(),
+          customerName,
+          activeRules: activeRuleTexts,
+        }),
       });
       const data = await res.json();
-      setReplyMessage(data.reply || 'Here are verified dishes matching your craving:');
+      setReplyMessage(data.reply || `Here are verified dishes for you, ${customerName}:`);
       setRecommendations(data.recommendations || []);
+      setIsGroceryIntent(!!data.isGroceryIntent);
     } catch (err) {
       console.error('AI Concierge error:', err);
       // Fallback
-      setReplyMessage('Here are top culinary recommendations from verified Chopwize kitchens:');
+      setReplyMessage(`Oya ${customerName}, here are top culinary recommendations from verified Chopwize kitchens:`);
       const fallback = menuItems.slice(0, 3).map((m) => ({
         id: m.id,
         name: m.name,

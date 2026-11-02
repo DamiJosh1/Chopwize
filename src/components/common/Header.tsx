@@ -12,7 +12,7 @@ import {
   User,
   Compass,
   Receipt,
-  CalendarDays,
+  ShoppingCart,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -25,10 +25,13 @@ export const Header: React.FC = () => {
     setIsLocationModalOpen,
     cart,
     setIsCartOpen,
+    groceryCart,
+    setIsGroceryCartOpen,
     openAIConciergeWithQuery,
   } = useApp();
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalGroceryCount = groceryCart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <header className="sticky top-0 z-40 bg-[#FFFFFF] border-b border-[#EAE5E9] shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
@@ -80,18 +83,18 @@ export const Header: React.FC = () => {
                     : 'hover:text-[#242124]'
                 }`}
               >
-                Home
+                Home & AI
               </button>
               <button
-                onClick={() => setCustomerTab('discover')}
+                onClick={() => setCustomerTab('explore')}
                 className={`flex items-center gap-1.5 transition-colors pb-0.5 ${
-                  customerTab === 'discover'
+                  customerTab === 'explore'
                     ? 'text-[#30102F] font-semibold border-b-2 border-[#30102F]'
                     : 'hover:text-[#242124]'
                 }`}
               >
                 <Compass className="w-4 h-4" />
-                Discover
+                Explore & Market
               </button>
               <button
                 onClick={() => setCustomerTab('orders')}
@@ -105,33 +108,28 @@ export const Header: React.FC = () => {
                 Orders
               </button>
               <button
-                onClick={() => setCustomerTab('plans')}
+                onClick={() => setCustomerTab('profile')}
                 className={`flex items-center gap-1.5 transition-colors pb-0.5 ${
-                  customerTab === 'plans'
+                  customerTab === 'profile'
                     ? 'text-[#30102F] font-semibold border-b-2 border-[#30102F]'
                     : 'hover:text-[#242124]'
                 }`}
               >
-                <CalendarDays className="w-4 h-4" />
-                Plans & Budget
+                <User className="w-4 h-4" />
+                Food Memory & Profile
               </button>
               <button
                 onClick={() => openAIConciergeWithQuery('What do you recommend for lunch today?')}
                 className="flex items-center gap-1.5 text-[#30102F] bg-[#FAF3F9] hover:bg-[#F3E7F2] px-3 py-1.5 rounded-xl border border-[#30102F]/15 font-semibold text-xs transition-colors"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#CBB477]" />
-                AI Concierge
+                Ask Chopwize AI
               </button>
             </nav>
           )}
 
-          {/* Right Area: Role Switcher & Cart */}
+          {/* Right Area: Role Switcher, Grocery Basket & Prepared Tray */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Demo Environment Badge */}
-            <span className="hidden lg:inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide uppercase bg-[#FAF3F9] text-[#30102F] border border-[#30102F]/20">
-              Demo Mode
-            </span>
-
             {/* Role Switcher Dropdown */}
             <div className="relative group">
               <label htmlFor="role-select" className="sr-only">Switch App Role</label>
@@ -155,20 +153,39 @@ export const Header: React.FC = () => {
               <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#716B71]" />
             </div>
 
-            {/* Cart Trigger (Customer role only) */}
+            {/* Customer Trays (Market Groceries + Restaurant Meals) */}
             {role === 'customer' && (
-              <button
-                onClick={() => setIsCartOpen(true)}
-                className="relative p-2.5 rounded-xl text-[#30102F] bg-[#FAF8F4] hover:bg-[#FAF3F9] border border-[#EAE5E9] transition-colors focus:outline-none focus:ring-2 focus:ring-[#30102F] min-w-[44px] min-h-[44px] flex items-center justify-center"
-                aria-label={`View food tray with ${totalCartCount} items`}
-              >
-                <ShoppingBag className="w-5 h-5 text-[#30102F]" />
-                {totalCartCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-[#30102F] text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm tabular-nums">
-                    {totalCartCount}
-                  </span>
-                )}
-              </button>
+              <div className="flex items-center gap-1.5">
+                {/* Chopwize Market Grocery Basket */}
+                <button
+                  onClick={() => setIsGroceryCartOpen(true)}
+                  className="relative p-2.5 rounded-xl text-[#242124] bg-[#FAF8F4] hover:bg-[#FAF3F9] border border-[#EAE5E9] transition-colors focus:outline-none min-w-[44px] min-h-[44px] flex items-center justify-center"
+                  title="Chopwize Market Grocery Basket"
+                  aria-label={`View grocery basket with ${totalGroceryCount} items`}
+                >
+                  <ShoppingCart className="w-4 h-4 text-[#716B71]" />
+                  {totalGroceryCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-[#287A55] text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-xs tabular-nums">
+                      {totalGroceryCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Prepared Meal Tray */}
+                <button
+                  onClick={() => setIsCartOpen(true)}
+                  className="relative p-2.5 rounded-xl text-[#30102F] bg-[#FAF8F4] hover:bg-[#FAF3F9] border border-[#EAE5E9] transition-colors focus:outline-none focus:ring-2 focus:ring-[#30102F] min-w-[44px] min-h-[44px] flex items-center justify-center"
+                  aria-label={`View prepared meal tray with ${totalCartCount} items`}
+                  title="Prepared Meal Food Tray"
+                >
+                  <ShoppingBag className="w-5 h-5 text-[#30102F]" />
+                  {totalCartCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-[#30102F] text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm tabular-nums">
+                      {totalCartCount}
+                    </span>
+                  )}
+                </button>
+              </div>
             )}
           </div>
 

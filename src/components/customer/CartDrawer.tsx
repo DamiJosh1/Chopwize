@@ -161,9 +161,19 @@ export const CartDrawer: React.FC = () => {
                             Portion: {item.selectedPortion.name}
                           </p>
                         )}
+                        {item.selectedProtein && (
+                          <p className="text-[11px] text-[#30102F] font-medium">
+                            Protein: {item.selectedProtein.name}
+                          </p>
+                        )}
                         {item.selectedAddOns.length > 0 && (
                           <p className="text-[10px] text-[#716B71]">
                             Add-ons: {item.selectedAddOns.map((a) => a.name).join(', ')}
+                          </p>
+                        )}
+                        {item.removedIngredients && item.removedIngredients.length > 0 && (
+                          <p className="text-[10px] text-red-600 font-medium">
+                            Omit: {item.removedIngredients.map((ing) => `No ${ing}`).join(', ')}
                           </p>
                         )}
                         {item.specialInstructions && (

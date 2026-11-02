@@ -38,6 +38,8 @@ export const RestaurantView: React.FC = () => {
   const [customizingItem, setCustomizingItem] = useState<MenuItem | null>(null);
   const [selectedPortion, setSelectedPortion] = useState<MenuItemPortion | undefined>();
   const [selectedAddOns, setSelectedAddOns] = useState<MenuItemAddOn[]>([]);
+  const [selectedProtein, setSelectedProtein] = useState<{ name: string; priceDelta: number } | undefined>();
+  const [removedIngredients, setRemovedIngredients] = useState<string[]>([]);
   const [specialNote, setSpecialNote] = useState('');
 
   if (!restaurant) {
@@ -73,7 +75,9 @@ export const RestaurantView: React.FC = () => {
   const handleOpenCustomize = (dish: MenuItem) => {
     setCustomizingItem(dish);
     setSelectedPortion(dish.portionOptions ? dish.portionOptions[0] : undefined);
+    setSelectedProtein(dish.availableProteins && dish.availableProteins.length > 0 ? dish.availableProteins[0] : undefined);
     setSelectedAddOns([]);
+    setRemovedIngredients([]);
     setSpecialNote('');
   };
 
@@ -85,15 +89,29 @@ export const RestaurantView: React.FC = () => {
     );
   };
 
+  const toggleRemovedIngredient = (ing: string) => {
+    setRemovedIngredients((prev) =>
+      prev.includes(ing) ? prev.filter((i) => i !== ing) : [...prev, ing]
+    );
+  };
+
   const handleConfirmAddToCart = () => {
     if (!customizingItem) return;
-    addToCart(customizingItem, selectedPortion, selectedAddOns, specialNote);
+    addToCart(
+      customizingItem,
+      selectedPortion,
+      selectedAddOns,
+      selectedProtein,
+      removedIngredients,
+      specialNote
+    );
     setCustomizingItem(null);
   };
 
   const calculatedModalPrice = customizingItem
     ? customizingItem.price +
       (selectedPortion ? selectedPortion.priceDelta : 0) +
+      (selectedProtein ? selectedProtein.priceDelta : 0) +
       selectedAddOns.reduce((s, a) => s + a.price, 0)
     : 0;
 
@@ -344,6 +362,49 @@ export const RestaurantView: React.FC = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-1">
+              {/* Choice of Protein */}
+              {customizingItem.availableProteins && customizingItem.availableProteins.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-xs font-bold text-[#242124]">
+                      Select Protein (Choice of 1):
+                    </label>
+                    <span className="text-[10px] text-[#CBB477] font-bold uppercase tracking-wider bg-[#30102F] px-1.5 py-0.5 rounded">
+                      Required
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {customizingItem.availableProteins.map((protein) => {
+                      const isSelected = selectedProtein?.name === protein.name;
+                      return (
+                        <button
+                          key={protein.name}
+                          type="button"
+                          onClick={() => setSelectedProtein(protein)}
+                          className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-xs font-medium transition-colors ${
+                            isSelected
+                              ? 'border-[#30102F] bg-[#FAF3F9] text-[#30102F] font-bold'
+                              : 'border-[#EAE5E9] bg-white text-[#242124]'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${isSelected ? 'border-[#30102F]' : 'border-[#716B71]'}`}>
+                              {isSelected && <div className="w-2 h-2 rounded-full bg-[#30102F]" />}
+                            </div>
+                            <span>{protein.name}</span>
+                          </div>
+                          <span>
+                            {protein.priceDelta > 0
+                              ? `+₦${protein.priceDelta.toLocaleString()}`
+                              : 'Included'}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Portions / Swallow options */}
               {customizingItem.portionOptions && (
                 <div>
@@ -375,7 +436,7 @@ export const RestaurantView: React.FC = () => {
                 </div>
               )}
 
-              {/* Add-ons */}
+              {/* Optional Add-ons */}
               {customizingItem.addOns && (
                 <div>
                   <label className="block text-xs font-bold text-[#242124] mb-2">
@@ -408,6 +469,43 @@ export const RestaurantView: React.FC = () => {
                 </div>
               )}
 
+              {/* Removable Ingredients */}
+              {customizingItem.removableIngredients && customizingItem.removableIngredients.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-[#242124]">
+                      Omit Ingredients (Custom Kitchen Prep):
+                    </label>
+                    <span className="text-[10px] text-[#716B71]">Optional</span>
+                  </div>
+                  <p className="text-[11px] text-[#716B71] mb-2">
+                    Select any ingredients you would like our kitchen to leave out of your dish.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {customizingItem.removableIngredients.map((ing) => {
+                      const isOmitted = removedIngredients.includes(ing);
+                      return (
+                        <button
+                          key={ing}
+                          type="button"
+                          onClick={() => toggleRemovedIngredient(ing)}
+                          className={`flex items-center gap-2 p-2 rounded-xl border text-xs text-left transition-colors ${
+                            isOmitted
+                              ? 'border-red-400 bg-red-50 text-red-700 font-semibold'
+                              : 'border-[#EAE5E9] bg-white text-[#242124]'
+                          }`}
+                        >
+                          <div className={`w-3.5 h-3.5 rounded flex items-center justify-center border ${isOmitted ? 'bg-red-600 border-red-600 text-white' : 'border-[#716B71]'}`}>
+                            {isOmitted && <X className="w-2.5 h-2.5" />}
+                          </div>
+                          <span className="truncate">No {ing}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Special Instructions */}
               <div>
                 <label className="block text-xs font-bold text-[#242124] mb-1">
@@ -416,7 +514,7 @@ export const RestaurantView: React.FC = () => {
                 <input
                   type="text"
                   maxLength={100}
-                  placeholder="e.g. Extra pepper on the side, no onions"
+                  placeholder="e.g. Extra pepper on the side, well fried"
                   value={specialNote}
                   onChange={(e) => setSpecialNote(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-[#EAE5E9] text-xs bg-[#FAF8F4] focus:outline-none focus:ring-2 focus:ring-[#30102F]"

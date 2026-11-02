@@ -101,7 +101,7 @@ export const OrdersView: React.FC = () => {
             Discover verified Nigerian restaurants in your area and enjoy hot meals.
           </p>
           <button
-            onClick={() => setCustomerTab('discover')}
+            onClick={() => setCustomerTab('explore')}
             className="mt-4 px-4 py-2 rounded-xl bg-[#30102F] text-white text-xs font-semibold"
           >
             Explore Menu Items
@@ -338,9 +338,24 @@ export const OrdersView: React.FC = () => {
                             ({item.selectedPortion.name})
                           </span>
                         )}
+                        {item.selectedProtein && (
+                          <p className="text-[10px] text-[#30102F] font-medium">
+                            Protein: {item.selectedProtein.name}
+                          </p>
+                        )}
                         {item.selectedAddOns.length > 0 && (
                           <p className="text-[10px] text-[#716B71]">
                             + {item.selectedAddOns.map((a) => a.name).join(', ')}
+                          </p>
+                        )}
+                        {item.removedIngredients && item.removedIngredients.length > 0 && (
+                          <p className="text-[10px] text-red-600">
+                            Omit: {item.removedIngredients.map((i) => `No ${i}`).join(', ')}
+                          </p>
+                        )}
+                        {item.specialInstructions && (
+                          <p className="text-[10px] italic text-[#242124]/70">
+                            Note: "{item.specialInstructions}"
                           </p>
                         )}
                       </div>

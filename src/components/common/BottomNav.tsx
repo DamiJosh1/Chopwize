@@ -1,30 +1,29 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { Home, Compass, Receipt, CalendarDays, UserRound } from 'lucide-react';
+import { Home, Compass, Receipt, UserRound } from 'lucide-react';
 
 export const BottomNav: React.FC = () => {
-  const { customerTab, setCustomerTab, orders } = useApp();
+  const { customerTab, setCustomerTab, orders, groceryCart } = useApp();
 
   const activeOrdersCount = orders.filter(
     (o) => o.timelineState !== 'completed' && o.timelineState !== 'cancelled'
   ).length;
 
   const tabs: Array<{
-    id: 'home' | 'discover' | 'orders' | 'plans' | 'profile';
+    id: 'home' | 'explore' | 'orders' | 'profile';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     badge?: number;
   }> = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'discover', label: 'Discover', icon: Compass },
+    { id: 'home', label: 'Home & AI', icon: Home },
+    { id: 'explore', label: 'Explore & Market', icon: Compass, badge: groceryCart.length > 0 ? groceryCart.length : undefined },
     { id: 'orders', label: 'Orders', icon: Receipt, badge: activeOrdersCount },
-    { id: 'plans', label: 'Plans', icon: CalendarDays },
-    { id: 'profile', label: 'Profile', icon: UserRound },
+    { id: 'profile', label: 'Food Memory', icon: UserRound },
   ];
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FFFFFF] border-t border-[#EAE5E9] pb-safe shadow-[0_-2px_10px_rgba(0,0,0,0.03)]">
-      <div className="grid grid-cols-5 items-center h-16 max-w-lg mx-auto">
+      <div className="grid grid-cols-4 items-center h-16 max-w-md mx-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = customerTab === tab.id;

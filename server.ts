@@ -25,37 +25,51 @@ if (apiKey && apiKey !== 'MY_GEMINI_API_KEY') {
   });
 }
 
-// Nigerian Food Catalog Context for Grounded AI Responses
+// Nigerian Food & Market Catalogs for Grounded AI Responses
 const FOOD_CATALOG = [
-  { id: 'm1', name: 'Signature Jollof Rice with Goat Meat & Dodo', restaurant: 'Terra Kulture Restaurant', cuisine: 'Nigerian Traditional', price: 4200, category: 'Rice Dishes', spice: 'Medium', tags: ['comfort', 'local favourites', 'bestseller'] },
-  { id: 'm2', name: 'Seafood Okro Soup with Poundo Yam', restaurant: 'Terra Kulture Restaurant', cuisine: 'Nigerian Traditional', price: 5800, category: 'Swallows & Soups', spice: 'Medium', tags: ['comfort', 'seafood', 'premium'] },
-  { id: 'm3', name: 'Native Asun Fried Rice with Smoked Pepper Sauce', restaurant: 'Yellow Chilli', cuisine: 'Nigerian Fusion', price: 4600, category: 'Rice Dishes', spice: 'Spicy', tags: ['spicy', 'local favourites'] },
-  { id: 'm4', name: 'Slow-Cooked Egusi Soup with Assorted Meat & Eba', restaurant: 'Bukka Hut', cuisine: 'Authentic Bukka', price: 3400, category: 'Swallows & Soups', spice: 'Medium', tags: ['comfort', 'budget-friendly', 'lunch'] },
-  { id: 'm5', name: 'Charcoal Grilled Suya Platter with Spiced Onions', restaurant: 'Danfo Bistro', cuisine: 'Street Gourmet', price: 3800, category: 'Grills & Suya', spice: 'Spicy', tags: ['grilled', 'spicy', 'snack'] },
-  { id: 'm6', name: 'Catfish Pepper Soup with Boiled Sweet Yam', restaurant: 'Nkoyo Specialities', cuisine: 'Soups & Grills', price: 4900, category: 'Swallows & Soups', spice: 'Spicy', tags: ['spicy', 'comfort', 'light meal'] },
-  { id: 'm7', name: 'Ofada Rice with Ayamase Sauce & Boiled Egg', restaurant: 'The Place Restaurant', cuisine: 'Fast Casual', price: 2900, category: 'Rice Dishes', spice: 'Spicy', tags: ['budget-friendly', 'quick lunch', 'local favourites'] },
-  { id: 'm8', name: 'Crispy Akara & Warm Ogi Breakfast Bowl', restaurant: 'Bukka Hut', cuisine: 'Breakfast & Street', price: 1800, category: 'Breakfast & Street', spice: 'Mild', tags: ['breakfast', 'budget-friendly', 'light meal'] },
-  { id: 'm9', name: 'Fresh Hibiscus Zobo Cooler with Citrus & Ginger', restaurant: 'Danfo Bistro', cuisine: 'Refreshers', price: 1200, category: 'Drinks & Refreshers', spice: 'Mild', tags: ['drink', 'light meal', 'healthy'] },
-  { id: 'm10', name: 'Golden Warm Puff Puff (10 pcs) with Spiced Honey', restaurant: 'The Place Restaurant', cuisine: 'Pastries & Snacks', price: 1500, category: 'Snacks & Small Chops', spice: 'Mild', tags: ['sweet treat', 'snack'] },
-  { id: 'm11', name: 'Grilled Jumbo Croaker Fish with Yam Fries & Sauce', restaurant: 'Bungalow Grill', cuisine: 'Grills & Seafood', price: 6500, category: 'Grills & Suya', spice: 'Medium', tags: ['grilled', 'dinner', 'premium'] },
-  { id: 'm12', name: 'Smoked Smoked Chicken Caesar Wrap (African Twist)', restaurant: 'Ile Eros', cuisine: 'Modern Gourmet', price: 3600, category: 'Light Bites', spice: 'Mild', tags: ['light meal', 'quick lunch'] }
+  { id: 'm1', name: 'Signature Jollof Rice with Goat Meat & Dodo', restaurant: 'Terra Kulture Restaurant', cuisine: 'Nigerian Traditional', culture: 'Yoruba', price: 4200, category: 'Rice Dishes', spice: 'Medium', tags: ['comfort', 'local favourites', 'bestseller'] },
+  { id: 'm-amala', name: 'Hot Oyo Amala with Abula (Ewedu & Gbegiri) & Goat Meat', restaurant: 'Bukka Hut', cuisine: 'Authentic Bukka', culture: 'Yoruba', price: 3600, category: 'Swallows & Soups', spice: 'Medium', tags: ['indigenous', 'swallow', 'yoruba', 'bestseller'] },
+  { id: 'm-oha', name: 'Authentic Eastern Oha Soup with Pounded Yam & Stockfish', restaurant: 'Nkoyo Specialities', cuisine: 'Calabar Traditional', culture: 'Igbo', price: 4800, category: 'Swallows & Soups', spice: 'Medium', tags: ['indigenous', 'igbo', 'swallow'] },
+  { id: 'm-tuwo', name: 'Northern Tuwo Shinkafa with Miyan Kuka & Tender Beef', restaurant: 'Nkoyo Specialities', cuisine: 'Northern Traditional', culture: 'Hausa', price: 3900, category: 'Swallows & Soups', spice: 'Mild', tags: ['indigenous', 'hausa', 'swallow'] },
+  { id: 'm-afang', name: 'Calabar Native Afang Soup with Periwinkles & Pounded Yam', restaurant: 'Nkoyo Specialities', cuisine: 'Calabar Traditional', culture: 'Efik/Ibibio', price: 5200, category: 'Swallows & Soups', spice: 'Spicy', tags: ['indigenous', 'efik', 'swallow'] },
+  { id: 'm2', name: 'Seafood Okro Soup with Poundo Yam', restaurant: 'Terra Kulture Restaurant', cuisine: 'Nigerian Traditional', culture: 'General Nigerian', price: 5800, category: 'Swallows & Soups', spice: 'Medium', tags: ['comfort', 'seafood', 'premium'] },
+  { id: 'm3', name: 'Native Asun Fried Rice with Smoked Pepper Sauce', restaurant: 'Yellow Chilli', cuisine: 'Nigerian Fusion', culture: 'Yoruba', price: 4600, category: 'Rice Dishes', spice: 'Spicy', tags: ['spicy', 'local favourites'] },
+  { id: 'm4', name: 'Slow-Cooked Egusi Soup with Assorted Meat & Eba', restaurant: 'Bukka Hut', cuisine: 'Authentic Bukka', culture: 'General Nigerian', price: 3400, category: 'Swallows & Soups', spice: 'Medium', tags: ['comfort', 'budget-friendly', 'lunch'] },
+  { id: 'm5', name: 'Charcoal Grilled Suya Platter with Spiced Onions', restaurant: 'Danfo Bistro', cuisine: 'Street Gourmet', culture: 'Hausa', price: 3800, category: 'Grills & Suya', spice: 'Spicy', tags: ['grilled', 'spicy', 'snack'] },
+  { id: 'm6', name: 'Ofada Rice with Ayamase Sauce & Boiled Egg', restaurant: 'The Place Restaurant', cuisine: 'Fast Casual', culture: 'Yoruba', price: 2900, category: 'Rice Dishes', spice: 'Spicy', tags: ['budget-friendly', 'quick lunch', 'local favourites'] },
+  { id: 'm8', name: 'Fresh Hibiscus Zobo Cooler with Citrus & Ginger', restaurant: 'Danfo Bistro', cuisine: 'Refreshers', culture: 'General Nigerian', price: 1200, category: 'Drinks & Refreshers', spice: 'Mild', tags: ['drink', 'light meal', 'healthy'] }
 ];
 
-// 1. AI Concierge API
+const GROCERY_CATALOG = [
+  { id: 'g-spag-1', name: 'Golden Penny Spaghetti', brand: 'Golden Penny', category: 'Pasta & Noodles', packSize: '500g Pack', price: 950 },
+  { id: 'g-indomie-1', name: 'Indomie Instant Noodles (Onion Chicken)', brand: 'Indomie', category: 'Pasta & Noodles', packSize: 'Hungryman 180g', price: 650 },
+  { id: 'g-rice-1', name: 'Mama Gold Pure Thai Parboiled Rice', brand: 'Mama Gold', category: 'Grains & Rice', packSize: '5kg Bag', price: 8400 },
+  { id: 'g-beans-1', name: 'Oloyin Sweet Honey Beans (Cleaned)', brand: 'Premier Harvest', category: 'Grains & Rice', packSize: '2kg Pack', price: 4200 },
+  { id: 'g-garri-1', name: 'Ijebu Crispy White Garri', brand: 'Ogun Gold', category: 'Flour & Swallow', packSize: '2kg Bag', price: 2800 },
+  { id: 'g-tomato-1', name: 'Gino Peppe & Onion Tomato Paste', brand: 'Gino', category: 'Canned Foods', packSize: 'Pack of 5 (70g)', price: 1600 },
+  { id: 'g-sardine-1', name: 'Titus Wild Sardines in Vegetable Oil', brand: 'Titus', category: 'Canned Foods', packSize: '125g Can', price: 1350 },
+  { id: 'g-oil-1', name: "Devon King's Pure Vegetable Cooking Oil", brand: "Devon King's", category: 'Oils & Seasoning', packSize: '1 Litre Bottle', price: 3200 },
+  { id: 'g-seasoning-1', name: 'Maggi Star Seasoning Cubes', brand: 'Maggi', category: 'Oils & Seasoning', packSize: 'Pack of 100', price: 1950 },
+  { id: 'g-milk-1', name: 'Peak Full Cream Evaporated Milk Pouch', brand: 'Peak', category: 'Dairy & Drinks', packSize: '800g Pouch', price: 4800 }
+];
+
+// 1. Central Chopwize AI Food Assistant API (Personality: Playful, caring, familiar with Nigerian nuances)
 app.post('/api/ai/concierge', async (req, res) => {
-  const { prompt, dietaryRestrictions, maxBudget } = req.body;
+  const { prompt, customerName = 'Amina', activeRules = [], dietaryRestrictions, maxBudget } = req.body;
   if (!prompt || typeof prompt !== 'string') {
     return res.status(400).json({ error: 'Prompt is required' });
   }
 
-  // Fallback intelligent filter if Gemini is unavailable
   const runFallbackMatch = () => {
-    const query = prompt.toLowerCase();
-    let matches = FOOD_CATALOG.filter(item => {
-      const matchText = (item.name + ' ' + item.category + ' ' + item.tags.join(' ') + ' ' + item.restaurant).toLowerCase();
+    const q = prompt.toLowerCase();
+    let matches = FOOD_CATALOG.filter((item) => {
+      const matchText = (item.name + ' ' + item.category + ' ' + item.culture + ' ' + item.tags.join(' ') + ' ' + item.restaurant).toLowerCase();
       if (maxBudget && item.price > maxBudget) return false;
-      if (dietaryRestrictions?.includes('seafood') && item.name.toLowerCase().includes('seafood')) return false;
-      return query.split(' ').some(word => word.length > 2 && matchText.includes(word));
+      if (dietaryRestrictions?.includes('seafood') && (item.name.toLowerCase().includes('seafood') || item.name.toLowerCase().includes('fish') || item.name.toLowerCase().includes('prawn'))) return false;
+      if (q.includes('yoruba') && item.culture !== 'Yoruba') return false;
+      if (q.includes('hausa') && item.culture !== 'Hausa') return false;
+      if (q.includes('igbo') && item.culture !== 'Igbo') return false;
+      return q.split(' ').some((w) => w.length > 2 && matchText.includes(w));
     });
 
     if (matches.length === 0) {
@@ -64,15 +78,20 @@ app.post('/api/ai/concierge', async (req, res) => {
       matches = matches.slice(0, 3);
     }
 
+    const playfulIntro = q.includes('hungry')
+      ? `This hunger is serious business, ${customerName}! 😂 Let's solve it right now with verified dishes near you:`
+      : `Oya ${customerName}, here are delicious options that match your craving:`;
+
     return {
-      reply: `Here are verified recommendations from top Lagos and Abuja partner restaurants matching "${prompt}":`,
-      recommendations: matches.map(m => ({
+      reply: playfulIntro,
+      recommendations: matches.map((m) => ({
         id: m.id,
         name: m.name,
         restaurant: m.restaurant,
         price: m.price,
-        matchReason: `Fits your craving for ${m.category.toLowerCase()} (${m.spice} spice, ₦${m.price.toLocaleString()}).`
-      }))
+        matchReason: `Fits your craving for authentic ${m.culture || m.category} (${m.spice} spice, ₦${m.price.toLocaleString()}).`
+      })),
+      isGroceryIntent: q.includes('market') || q.includes('groceries') || q.includes('spaghetti') || q.includes('noodles')
     };
   };
 
@@ -81,20 +100,25 @@ app.post('/api/ai/concierge', async (req, res) => {
   }
 
   try {
-    const systemPrompt = `You are Chopwize's AI Food Concierge for Nigeria.
-Your job is to recommend real food items from our catalog based on the customer's craving or question.
-Here is the official partner catalog:
+    const systemPrompt = `You are Chopwize AI, the intelligent food companion for Nigeria.
+Personality:
+- Playful and slightly goofy, but polite, caring and deeply knowledgeable about Nigerian food (Lagos, Abuja, Yoruba, Igbo, Hausa, Calabar meals).
+- Greet customer naturally using their preferred name: "${customerName}".
+- Example vibe: "This hunger is serious business! 😂 Let's solve it. Are you looking for something light, or something that will make you forget your worries?"
+- Do NOT use jokes inappropriately if the user mentions an allergy, emergency, or payment problem.
+- Strictly adhere to these Customer-defined AI Rules: ${JSON.stringify(activeRules)}
+- Ground all recommendations in our official catalog:
 ${JSON.stringify(FOOD_CATALOG, null, 2)}
 
-User Request: "${prompt}"
-${dietaryRestrictions ? `Dietary restrictions: ${dietaryRestrictions}` : ''}
-${maxBudget ? `Budget cap: ₦${maxBudget}` : ''}
+User request: "${prompt}"
+${dietaryRestrictions ? `Medical Restrictions: ${dietaryRestrictions}` : ''}
+${maxBudget ? `Budget Limit: ₦${maxBudget}` : ''}
 
 Rules:
-1. Recommend up to 3 real items strictly from the provided catalog.
-2. Provide a warm, concise Nigerian hospitality reply (1-2 sentences).
-3. For each recommendation, provide the exact item id from the catalog, name, restaurant, price, and a 1-sentence reason.
-4. Output must be valid JSON strictly matching this structure:
+1. Recommend up to 3 real items strictly from the catalog.
+2. Provide a playful, caring Nigerian response (1-2 sentences).
+3. Check if the user is asking about groceries or Market items.
+4. Output valid JSON:
 {
   "reply": "string",
   "recommendations": [
@@ -105,7 +129,8 @@ Rules:
       "price": number,
       "matchReason": "string"
     }
-  ]
+  ],
+  "isGroceryIntent": boolean
 }`;
 
     const response = await ai.models.generateContent({
@@ -128,7 +153,54 @@ Rules:
   }
 });
 
-// 2. AI Cooking Assistant & Recipe Ideas
+// 2. Chopwize Market: Natural Grocery Assistant (Section 9 & 10)
+app.post('/api/ai/grocery-assistant', async (req, res) => {
+  const { query } = req.body;
+  if (!query || typeof query !== 'string') {
+    return res.status(400).json({ error: 'Query is required' });
+  }
+
+  const q = query.toLowerCase();
+  const matchedProducts = GROCERY_CATALOG.filter((p) => {
+    return (
+      q.includes(p.name.toLowerCase()) ||
+      q.includes(p.brand.toLowerCase()) ||
+      q.includes(p.category.toLowerCase()) ||
+      (q.includes('spaghetti') && p.name.includes('Spaghetti')) ||
+      (q.includes('indomie') && p.name.includes('Indomie')) ||
+      (q.includes('rice') && p.name.includes('Rice')) ||
+      (q.includes('beans') && p.name.includes('Beans')) ||
+      (q.includes('oil') && p.name.includes('Oil')) ||
+      (q.includes('milk') && p.name.includes('Milk')) ||
+      (q.includes('tomato') && p.name.includes('Tomato')) ||
+      (q.includes('sardine') && p.name.includes('Sardine')) ||
+      (q.includes('garri') && p.name.includes('Garri'))
+    );
+  });
+
+  const finalMatches = matchedProducts.length > 0 ? matchedProducts : GROCERY_CATALOG.slice(0, 4);
+  const totalBasketCost = finalMatches.reduce((sum, item) => sum + item.price, 0);
+
+  return res.json({
+    reply: `I put together your Chopwize Market grocery basket with ${finalMatches.length} items from our verified shelf-stable catalog:`,
+    items: finalMatches.map((m) => ({
+      productId: m.id,
+      name: m.name,
+      brand: m.brand,
+      packSize: m.packSize,
+      price: m.price,
+      quantity: 1,
+    })),
+    totalCost: totalBasketCost,
+    consolidation: {
+      bestSingleStore: 'Ebeano Supermarket (Lekki Phase 1)',
+      availableCount: `${finalMatches.length} of ${finalMatches.length} items in 1 store`,
+      deliveryFee: 1100,
+    }
+  });
+});
+
+// 3. AI Cooking Assistant & Recipe Ideas (Section 4B & 12.6)
 app.post('/api/ai/cooking-assistant', async (req, res) => {
   const { ingredients, timeMinutes, mealType } = req.body;
 
@@ -198,7 +270,7 @@ Return JSON:
   }
 });
 
-// 3. AI Meal Planner (Weekly timetable generator)
+// 4. AI Meal Planner (Weekly timetable generator)
 app.post('/api/ai/meal-planner', async (req, res) => {
   const { weeklyBudget, preferences, householdSize } = req.body;
 

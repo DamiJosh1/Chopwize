@@ -1,5 +1,9 @@
 export type AppRole = 'customer' | 'restaurant' | 'rider' | 'admin';
 
+export type CustomerNavigationTab = 'home' | 'explore' | 'orders' | 'profile';
+
+export type FoodCulture = 'Yoruba' | 'Igbo' | 'Hausa' | 'Efik/Ibibio' | 'General Nigerian';
+
 export interface Restaurant {
   id: string;
   name: string;
@@ -55,6 +59,9 @@ export interface MenuItem {
   portionOptions?: MenuItemPortion[];
   addOns?: MenuItemAddOn[];
   isPopular?: boolean;
+  foodCulture?: FoodCulture;
+  removableIngredients?: string[];
+  availableProteins?: { name: string; priceDelta: number }[];
 }
 
 export interface CartItem {
@@ -63,11 +70,69 @@ export interface CartItem {
   quantity: number;
   selectedPortion?: MenuItemPortion;
   selectedAddOns: MenuItemAddOn[];
+  selectedProtein?: { name: string; priceDelta: number };
+  removedIngredients?: string[];
   specialInstructions?: string;
   unitPrice: number;
   lineTotal: number;
 }
 
+// Grocery & Chopwize Market Types
+export interface GroceryStore {
+  id: string;
+  name: string;
+  area: string;
+  rating: number;
+  deliveryFee: number;
+  minOrder: number;
+  openingHours: string;
+  isOpen: boolean;
+}
+
+export interface MarketProduct {
+  id: string;
+  name: string;
+  brand: string;
+  category: string;
+  imageUrl: string;
+  description: string;
+  packSize: string;
+  basePrice: number;
+  availableUnits: {
+    unitName: string; // e.g. "Single Pack", "Carton (40 pcs)", "5kg Bag"
+    price: number;
+    stock: number;
+  }[];
+  storeAvailability: {
+    storeId: string;
+    storeName: string;
+    price: number;
+    inStock: boolean;
+  }[];
+}
+
+export interface GroceryCartItem {
+  id: string;
+  product: MarketProduct;
+  selectedUnit: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface GroceryStoreComparison {
+  storeId: string;
+  storeName: string;
+  itemsAvailable: number;
+  totalItems: number;
+  missingItemNames: string[];
+  subtotal: number;
+  deliveryFee: number;
+  totalCost: number;
+  isFullMatch: boolean;
+}
+
+// Orders & Lifecycle
 export type OrderTimelineState =
   | 'awaiting_payment'
   | 'paid'
@@ -82,6 +147,7 @@ export type OrderTimelineState =
 export interface Order {
   id: string;
   orderNumber: string;
+  orderType?: 'restaurant_meal' | 'grocery_market' | 'surprise_delivery';
   customerName: string;
   customerPhone: string;
   deliveryAddress: string;
@@ -174,4 +240,64 @@ export interface RiderState {
   completedTripsToday: number;
   todayEarnings: number;
   rating: number;
+}
+
+// Customer-Defined AI Rules (Section 5)
+export interface AIRule {
+  id: string;
+  text: string;
+  category: 'budget' | 'ingredient' | 'cuisine' | 'cart_guard' | 'store_preference';
+  isActive: boolean;
+  isPermanent: boolean;
+  createdAt: string;
+}
+
+// Food Memory (Section 6)
+export interface FoodMemoryItem {
+  id: string;
+  type: 'favourite_meal' | 'favourite_restaurant' | 'dietary_habit' | 'frequent_grocery' | 'inferred_pattern';
+  label: string;
+  detail: string;
+  confirmedByCustomer: boolean;
+  dateObserved: string;
+}
+
+// Smart Meal Reminder (Section 7)
+export interface MealReminder {
+  id: string;
+  time: string;
+  mealSlot: 'Breakfast' | 'Lunch' | 'Dinner';
+  title: string;
+  message: string;
+  plannedMeal?: string;
+  suggestedDishes: {
+    name: string;
+    restaurant: string;
+    price: number;
+    menuItemId: string;
+  }[];
+  status: 'pending' | 'dismissed' | 'snoozed' | 'ordered' | 'completed' | 'skipped';
+}
+
+// Chopwize Surprise Delivery (Section 13)
+export interface SurpriseDeliveryConfig {
+  isEnabled: boolean;
+  frequency: 'weekly' | 'twice_monthly' | 'monthly' | 'occasionally';
+  maxBudget: number;
+  preferredAddress: string;
+  preferredTime: string;
+  spicePreference: string;
+  dietaryExclusions: string[];
+  activeInvitation?: {
+    id: string;
+    date: string;
+    restaurantName: string;
+    mealName: string;
+    menuItemId: string;
+    price: number;
+    deliveryFee: number;
+    total: number;
+    expiresAt: string;
+    status: 'pending' | 'accepted' | 'declined' | 'expired';
+  };
 }

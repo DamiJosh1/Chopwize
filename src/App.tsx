@@ -6,12 +6,12 @@ import { LocationModal } from './components/common/LocationModal';
 import { CartConflictModal } from './components/common/CartConflictModal';
 import { Toast } from './components/common/Toast';
 import { HomeView } from './components/customer/HomeView';
-import { DiscoverView } from './components/customer/DiscoverView';
+import { ExploreView } from './components/customer/ExploreView';
 import { RestaurantView } from './components/customer/RestaurantView';
 import { OrdersView } from './components/customer/OrdersView';
-import { PlansView } from './components/customer/PlansView';
 import { ProfileView } from './components/customer/ProfileView';
 import { CartDrawer } from './components/customer/CartDrawer';
+import { GroceryCartDrawer } from './components/customer/GroceryCartDrawer';
 import { AIConciergeModal } from './components/customer/AIConciergeModal';
 import { SurpriseMeModal } from './components/customer/SurpriseMeModal';
 import { CookingAssistantModal } from './components/customer/CookingAssistantModal';
@@ -36,9 +36,8 @@ const MainContent: React.FC = () => {
             ) : (
               <>
                 {customerTab === 'home' && <HomeView />}
-                {customerTab === 'discover' && <DiscoverView />}
+                {customerTab === 'explore' && <ExploreView />}
                 {customerTab === 'orders' && <OrdersView />}
-                {customerTab === 'plans' && <PlansView />}
                 {customerTab === 'profile' && <ProfileView />}
               </>
             )}
@@ -56,6 +55,7 @@ const MainContent: React.FC = () => {
       <LocationModal />
       <CartConflictModal />
       <CartDrawer />
+      <GroceryCartDrawer />
       <AIConciergeModal />
       <SurpriseMeModal />
       <CookingAssistantModal />

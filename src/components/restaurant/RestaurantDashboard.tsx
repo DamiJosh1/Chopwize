@@ -223,11 +223,17 @@ export const RestaurantDashboard: React.FC = () => {
 
                     <div className="text-xs text-[#242124] space-y-1">
                       {ord.items.map((it) => (
-                        <p key={it.cartItemId} className="font-medium">
-                          {it.quantity}× {it.menuItem.name}
+                        <div key={it.cartItemId} className="font-medium">
+                          <span>
+                            {it.quantity}× {it.menuItem.name}
+                          </span>
                           {it.selectedPortion && <span className="text-[#716B71] ml-1">({it.selectedPortion.name})</span>}
+                          {it.selectedProtein && <span className="text-[#30102F] font-bold ml-1.5">[Protein: {it.selectedProtein.name}]</span>}
+                          {it.removedIngredients && it.removedIngredients.length > 0 && (
+                            <span className="text-red-600 font-bold ml-1.5">[OMIT: {it.removedIngredients.join(', ')}]</span>
+                          )}
                           {it.specialInstructions && <span className="text-amber-800 ml-1 italic font-normal">"{it.specialInstructions}"</span>}
-                        </p>
+                        </div>
                       ))}
                     </div>
 
@@ -274,10 +280,15 @@ export const RestaurantDashboard: React.FC = () => {
 
                   <div className="text-xs text-[#242124] space-y-1">
                     {ord.items.map((it) => (
-                      <p key={it.cartItemId}>
-                        {it.quantity}× {it.menuItem.name}
+                      <div key={it.cartItemId}>
+                        <span className="font-medium">{it.quantity}× {it.menuItem.name}</span>
                         {it.selectedPortion && <span className="text-[#716B71] ml-1">({it.selectedPortion.name})</span>}
-                      </p>
+                        {it.selectedProtein && <span className="text-[#30102F] font-bold ml-1.5">[Protein: {it.selectedProtein.name}]</span>}
+                        {it.removedIngredients && it.removedIngredients.length > 0 && (
+                          <span className="text-red-600 font-bold ml-1.5">[OMIT: {it.removedIngredients.join(', ')}]</span>
+                        )}
+                        {it.specialInstructions && <p className="text-[11px] text-amber-800 italic mt-0.5">Note: "{it.specialInstructions}"</p>}
+                      </div>
                     ))}
                   </div>
 

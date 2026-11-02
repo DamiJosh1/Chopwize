@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import {
   Sparkles,
   Search,
+  Mic,
   Dices,
   ChefHat,
   Star,
@@ -10,13 +11,18 @@ import {
   ShieldCheck,
   ArrowRight,
   Plus,
-  Flame,
+  ShoppingCart,
+  CalendarDays,
+  Bell,
+  Gift,
   Check,
+  X,
 } from 'lucide-react';
-import { MenuItem, Restaurant } from '../../types';
+import { MenuItem } from '../../types';
 
 export const HomeView: React.FC = () => {
   const {
+    customerName,
     restaurants,
     menuItems,
     setSelectedRestaurantId,
@@ -26,298 +32,354 @@ export const HomeView: React.FC = () => {
     setIsCookingAssistantOpen,
     setCustomerTab,
     selectedLocation,
-    setIsLocationModalOpen,
+    mealReminders,
+    handleReminderAction,
+    surpriseConfig,
+    respondToSurpriseInvitation,
+    showToast,
   } = useApp();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [isListening, setIsListening] = useState(false);
 
-  const moodChips = [
-    { label: 'Comfort food', query: 'comforting swallow and native soup' },
-    { label: 'Something spicy', query: 'spicy asun and pepper soup' },
-    { label: 'Light meal', query: 'light grilled fish and healthy sides' },
-    { label: 'Grilled food', query: 'charcoal grilled suya and chicken' },
-    { label: 'Sweet treat', query: 'puff puff and sweet pastries' },
-    { label: 'Local favourites', query: 'authentic lagos bukka specialties' },
-    { label: 'Quick lunch', query: 'quick office lunch under 30 mins' },
-    { label: 'Budget-friendly', query: 'affordable meals under ₦3,500' },
+  const quickPrompts = [
+    { label: 'Find food under ₦4,000', query: 'Find authentic meals under ₦4,000' },
+    { label: 'What can I cook?', action: 'cook' },
+    { label: 'Plan my meals', action: 'plan' },
+    { label: 'Shop for groceries', action: 'market' },
+    { label: 'Yoruba indigenous food', query: 'Authentic Yoruba food around me' },
+    { label: 'Something spicy for lunch', query: 'Spicy pepper soup or jollof' },
   ];
 
-  const categories = [
-    { id: 'rice', name: 'Rice Dishes', icon: '🍚', count: '12+ dishes' },
-    { id: 'swallow', name: 'Swallows & Soups', icon: '🍲', count: '18+ dishes' },
-    { id: 'grills', name: 'Grills & Suya', icon: '🍢', count: '9+ dishes' },
-    { id: 'breakfast', name: 'Breakfast & Street', icon: '🍳', count: '7+ dishes' },
-    { id: 'snacks', name: 'Snacks & Chops', icon: '🥟', count: '11+ dishes' },
-    { id: 'drinks', name: 'Drinks & Zobo', icon: '🥤', count: '8+ refreshers' },
+  const indigenousCultures = [
+    { culture: 'Yoruba', desc: 'Amala, Abula (Ewedu & Gbegiri), Ofada Rice & Ayamase', sampleDishId: 'm-amala' },
+    { culture: 'Igbo', desc: 'Oha Soup, Ofe Nsala, Abacha, Pounded Yam', sampleDishId: 'm-oha' },
+    { culture: 'Hausa', desc: 'Tuwo Shinkafa, Miyan Kuka, Spiced Masa & Suya', sampleDishId: 'm-tuwo' },
+    { culture: 'Efik/Ibibio', desc: 'Calabar Afang Soup, Edikang Ikong & Periwinkles', sampleDishId: 'm-afang' },
   ];
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handlePromptSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
-    openAIConciergeWithQuery(searchQuery.trim());
+    if (!aiPrompt.trim()) return;
+    openAIConciergeWithQuery(aiPrompt.trim());
   };
 
-  const handleMoodClick = (chip: { label: string; query: string }) => {
-    if (selectedMood === chip.label) {
-      setSelectedMood(null);
+  // Voice Input (Section 12: Voice-to-Text)
+  const handleVoiceInput = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-NG'; // Nigerian English locale
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        showToast('Listening... Speak your food craving in Nigerian English');
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setAiPrompt(transcript);
+        setIsListening(false);
+        showToast(`Heard: "${transcript}". Edit or tap Ask to search.`);
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+        setAiPrompt('Find me spicy party jollof with goat meat under 4000 naira');
+        showToast('Voice simulated: "Find me spicy party jollof with goat meat under 4000 naira"');
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
     } else {
-      setSelectedMood(chip.label);
-      openAIConciergeWithQuery(chip.query);
+      // Clean fallback simulation
+      setAiPrompt('Find me spicy party jollof with goat meat under 4000 naira');
+      showToast('Voice simulated: "Find me spicy party jollof with goat meat under 4000 naira"');
     }
   };
 
+  const activeReminder = mealReminders.find((r) => r.status === 'pending');
+
   return (
-    <div className="space-y-8 sm:space-y-12 pb-16">
+    <div className="space-y-8 pb-16">
       
-      {/* Editorial Food Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#30102F] to-[#1c081b] text-white p-6 sm:p-10 lg:p-12 shadow-sm border border-[#30102F]/40">
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white/90 text-xs font-semibold backdrop-blur-xs mb-4 border border-white/15">
-            <Sparkles className="w-3.5 h-3.5 text-[#CBB477]" />
-            <span>Intelligent Nigerian Food Decisions</span>
+      {/* 1. Chopwize AI Central Opening Hero (Section 2 & 4) */}
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#30102F] via-[#240b23] to-[#170616] text-white p-6 sm:p-9 border border-[#30102F]/60 shadow-md">
+        <div className="relative z-10 max-w-2xl space-y-4">
+          
+          {/* Status Header */}
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-white/10 text-[#CBB477] flex items-center justify-center border border-white/15">
+              <Sparkles className="w-4 h-4 text-[#CBB477]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="font-heading font-extrabold text-sm sm:text-base text-white tracking-tight">
+                  Chopwize AI
+                </h1>
+                <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-white/10 px-2 py-0.5 rounded-full border border-emerald-400/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Online
+                </span>
+              </div>
+              <p className="text-[11px] text-white/70">Your intelligent Nigerian food companion</p>
+            </div>
           </div>
 
-          <h1 className="font-heading font-extrabold text-2xl sm:text-4xl lg:text-5xl tracking-tight leading-tight mb-3">
-            Good food starts with a <span className="text-[#CBB477]">better decision</span>.
-          </h1>
-          <p className="text-white/80 text-sm sm:text-base mb-6 max-w-lg leading-relaxed font-normal">
-            Discover verified native soups, smoky party jollof, tender charcoal grills and plan your daily meals across Lagos & Abuja.
-          </p>
+          {/* Assistant Greeting */}
+          <div>
+            <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-white tracking-tight leading-tight">
+              What are you eating today, <span className="text-[#CBB477]">{customerName}</span>?
+            </h2>
+            <p className="text-white/80 text-xs sm:text-sm mt-1 leading-relaxed">
+              Tell me what you're craving, what ingredients you have at home, or how much you want to spend.
+            </p>
+          </div>
 
-          {/* AI Search Prompt Form */}
-          <form onSubmit={handleSearchSubmit} className="relative max-w-xl">
-            <div className="relative flex items-center">
-              <Search className="w-5 h-5 text-[#716B71] absolute left-4 pointer-events-none" />
+          {/* AI Search & Voice Input Form */}
+          <form onSubmit={handlePromptSubmit} className="relative pt-1">
+            <div className="relative flex items-center bg-white rounded-2xl shadow-lg border border-white/20 p-1">
+              <Search className="w-4 h-4 text-[#716B71] ml-3 shrink-0 pointer-events-none" />
               <input
                 type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="What are you in the mood for? (e.g. spicy goat meat jollof under ₦4k)"
-                className="w-full pl-12 pr-28 py-3.5 rounded-2xl bg-white text-[#242124] text-sm focus:outline-none focus:ring-2 focus:ring-[#CBB477] placeholder:text-[#716B71] shadow-lg"
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                placeholder="Ask Chopwize AI anything... (e.g. food under ₦4,000, what to cook)"
+                className="w-full px-3 py-3 text-xs sm:text-sm text-[#242124] focus:outline-none placeholder:text-[#716B71]"
               />
+
+              {/* Voice-to-Text Button (Section 12) */}
+              <button
+                type="button"
+                onClick={handleVoiceInput}
+                className={`p-2.5 rounded-xl border transition-colors shrink-0 mr-1.5 ${
+                  isListening
+                    ? 'bg-red-50 border-red-300 text-red-600 animate-pulse'
+                    : 'bg-[#FAF8F4] border-[#EAE5E9] text-[#716B71] hover:text-[#30102F]'
+                }`}
+                title="Voice Input (Speech to text)"
+                aria-label="Speak your food request"
+              >
+                <Mic className="w-4 h-4" />
+              </button>
+
               <button
                 type="submit"
-                className="absolute right-2 px-4 py-2 rounded-xl bg-[#30102F] hover:bg-[#220b22] text-white text-xs font-bold transition-colors flex items-center gap-1.5"
+                className="px-4 py-2.5 rounded-xl bg-[#30102F] hover:bg-[#220b22] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shrink-0"
               >
-                <span>Find</span>
+                <span>Ask AI</span>
                 <Sparkles className="w-3.5 h-3.5 text-[#CBB477]" />
               </button>
             </div>
           </form>
 
-          {/* Location reassurance */}
-          <div className="mt-4 flex items-center gap-2 text-xs text-white/70">
-            <span>Delivering fresh to:</span>
-            <button
-              onClick={() => setIsLocationModalOpen(true)}
-              className="text-[#CBB477] font-semibold underline underline-offset-2 hover:text-white transition-colors"
-            >
-              {selectedLocation}
-            </button>
+          {/* Quick AI Prompts */}
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {quickPrompts.map((qp) => (
+              <button
+                key={qp.label}
+                onClick={() => {
+                  if (qp.action === 'cook') setIsCookingAssistantOpen(true);
+                  else if (qp.action === 'plan') setCustomerTab('profile');
+                  else if (qp.action === 'market') setCustomerTab('explore');
+                  else if (qp.query) openAIConciergeWithQuery(qp.query);
+                }}
+                className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-colors"
+              >
+                {qp.label}
+              </button>
+            ))}
           </div>
-        </div>
 
-        {/* Decorative subtle backdrop accent */}
-        <div className="absolute right-0 bottom-0 top-0 w-1/3 opacity-20 pointer-events-none hidden lg:block bg-radial from-[#CBB477]/40 to-transparent" />
+        </div>
       </section>
 
-      {/* Mood & Craving Chips */}
+      {/* 2. Smart Meal Reminder Banner (Section 7) */}
+      {activeReminder && (
+        <section className="p-4 sm:p-5 rounded-2xl bg-[#FAF3F9] border border-[#30102F]/20 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-[#30102F] text-white shrink-0 mt-0.5">
+              <Bell className="w-5 h-5 text-[#CBB477]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#9A6A18] bg-white px-2 py-0.5 rounded border border-[#CBB477]/30">
+                  {activeReminder.time} Smart Reminder
+                </span>
+                <h3 className="font-heading font-bold text-sm text-[#242124]">
+                  {activeReminder.title}
+                </h3>
+              </div>
+              <p className="text-xs text-[#716B71] mt-1 leading-relaxed">
+                {activeReminder.message} Planned: <strong className="text-[#242124]">{activeReminder.plannedMeal}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={() => handleReminderAction(activeReminder.id, 'order')}
+              className="px-3.5 py-2 rounded-xl bg-[#30102F] text-white text-xs font-bold hover:bg-[#220b22] transition-colors"
+            >
+              Order Now
+            </button>
+            <button
+              onClick={() => handleReminderAction(activeReminder.id, 'snooze')}
+              className="px-3 py-2 rounded-xl border border-[#EAE5E9] bg-white text-xs font-semibold text-[#716B71] hover:bg-[#FAF8F4]"
+            >
+              Snooze 15m
+            </button>
+            <button
+              onClick={() => handleReminderAction(activeReminder.id, 'dismiss')}
+              className="p-2 text-[#716B71] hover:text-[#242124]"
+              title="Dismiss"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* 3. Surprise Delivery Invitation (Section 13: Requires explicit consent, no auto charge) */}
+      {surpriseConfig.isEnabled && surpriseConfig.activeInvitation?.status === 'pending' && (
+        <section className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 border border-amber-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-amber-600 text-white shrink-0 mt-0.5">
+              <Gift className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-white px-2 py-0.5 rounded border border-amber-300">
+                  Surprise Delivery Programme
+                </span>
+                <h3 className="font-heading font-bold text-sm text-amber-950">
+                  A little food surprise invitation!
+                </h3>
+              </div>
+              <p className="text-xs text-amber-900/80 mt-1 leading-relaxed">
+                We found something delicious from {surpriseConfig.activeInvitation.restaurantName} fitting your preferences. Are you available to receive this meal?
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => respondToSurpriseInvitation('decline')}
+              className="px-3 py-2 rounded-xl border border-amber-300 bg-white text-xs font-semibold text-amber-900 hover:bg-amber-100"
+            >
+              Not Today (No charge)
+            </button>
+            <button
+              onClick={() => respondToSurpriseInvitation('accept')}
+              className="px-3.5 py-2 rounded-xl bg-[#30102F] text-white text-xs font-bold hover:bg-[#220b22]"
+            >
+              I'm Interested (View ₦{surpriseConfig.activeInvitation.total.toLocaleString()})
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* 4. Indigenous Food Discovery Showcase (Section 8) */}
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-heading font-bold text-sm sm:text-base text-[#242124]">
-            What's your craving today?
-          </h2>
-          <span className="text-xs text-[#716B71]">Search intents</span>
-        </div>
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
-          {moodChips.map((chip) => {
-            const isSelected = selectedMood === chip.label;
-            return (
-              <button
-                key={chip.label}
-                onClick={() => handleMoodClick(chip)}
-                className={`py-2 px-3.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border shrink-0 ${
-                  isSelected
-                    ? 'bg-[#30102F] text-white border-[#30102F] shadow-xs'
-                    : 'bg-white text-[#242124] hover:bg-[#FAF3F9] border-[#EAE5E9]'
-                }`}
-              >
-                {chip.label}
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Decision Support Feature Cards: Surprise Me & Home Cooking */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Surprise Me Card */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#EAE5E9] shadow-xs flex items-start justify-between gap-4">
           <div>
-            <div className="w-9 h-9 rounded-xl bg-[#FAF3F9] text-[#30102F] flex items-center justify-center mb-3">
-              <Dices className="w-5 h-5 text-[#CBB477]" />
-            </div>
-            <h3 className="font-heading font-bold text-base text-[#242124]">
-              Surprise Me
-            </h3>
-            <p className="text-xs text-[#716B71] mt-1 mb-4 leading-relaxed">
-              Tired of deciding? Set your budget and spice preference, and we'll pick a vetted dish from open partner kitchens.
-            </p>
-            <button
-              onClick={() => setIsSurpriseMeOpen(true)}
-              className="px-4 py-2 rounded-xl bg-[#FAF8F4] hover:bg-[#FAF3F9] text-[#30102F] border border-[#30102F]/20 text-xs font-bold inline-flex items-center gap-1.5 transition-colors"
-            >
-              <span>Roll Food Dice</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Cooking Assistant Card */}
-        <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#EAE5E9] shadow-xs flex items-start justify-between gap-4">
-          <div>
-            <div className="w-9 h-9 rounded-xl bg-[#FAF3F9] text-[#30102F] flex items-center justify-center mb-3">
-              <ChefHat className="w-5 h-5 text-[#CBB477]" />
-            </div>
-            <h3 className="font-heading font-bold text-base text-[#242124]">
-              Cooking Assistant
-            </h3>
-            <p className="text-xs text-[#716B71] mt-1 mb-4 leading-relaxed">
-              Have yam, palm oil, or peppers at home? Enter what's in your pantry for instant recipes or restaurant alternatives.
-            </p>
-            <button
-              onClick={() => setIsCookingAssistantOpen(true)}
-              className="px-4 py-2 rounded-xl bg-[#FAF8F4] hover:bg-[#FAF3F9] text-[#30102F] border border-[#30102F]/20 text-xs font-bold inline-flex items-center gap-1.5 transition-colors"
-            >
-              <span>Suggest Recipes</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Nigerian Restaurants */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="font-heading font-bold text-lg sm:text-xl text-[#242124]">
-              Nearby Verified Kitchens
+            <h2 className="font-heading font-bold text-base sm:text-lg text-[#242124]">
+              Indigenous Nigerian Food Cultures
             </h2>
             <p className="text-xs text-[#716B71]">
-              Inspected hygiene standards, CAC registered, and fresh preparation
+              Genuinely available dishes from Yoruba, Igbo, Hausa and Calabar heritage kitchens
             </p>
           </div>
           <button
-            onClick={() => setCustomerTab('discover')}
+            onClick={() => setCustomerTab('explore')}
             className="text-xs font-bold text-[#30102F] hover:underline flex items-center gap-1"
           >
-            <span>View all</span>
+            <span>Explore all</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {restaurants.map((rest) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {indigenousCultures.map((item) => (
             <div
-              key={rest.id}
-              onClick={() => setSelectedRestaurantId(rest.id)}
-              className="group cursor-pointer rounded-2xl bg-white border border-[#EAE5E9] overflow-hidden hover:border-[#30102F]/30 hover:shadow-md transition-all flex flex-col"
+              key={item.culture}
+              onClick={() => openAIConciergeWithQuery(`Show me authentic ${item.culture} food`)}
+              className="p-4 rounded-2xl bg-white border border-[#EAE5E9] hover:border-[#30102F]/40 hover:shadow-sm cursor-pointer transition-all flex flex-col justify-between"
             >
-              {/* Cover Image */}
-              <div className="relative h-44 bg-[#FAF8F4] overflow-hidden">
-                <img
-                  src={rest.coverImage}
-                  alt={rest.name}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300"
-                />
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-white/95 px-2.5 py-1 rounded-lg text-[11px] font-semibold text-[#242124] shadow-xs backdrop-blur-xs">
-                  <Star className="w-3.5 h-3.5 text-[#CBB477] fill-[#CBB477]" />
-                  <span>{rest.rating}</span>
-                  <span className="text-[#716B71]">({rest.reviewCount})</span>
-                </div>
-                {rest.isPaused && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                    <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-lg">
-                      Kitchen Busy / Paused
-                    </span>
-                  </div>
-                )}
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#9A6A18] bg-[#FDFBF7] px-2 py-0.5 rounded border border-[#CBB477]/30 inline-block mb-1">
+                  {item.culture} Kitchen
+                </span>
+                <h3 className="font-heading font-bold text-sm text-[#242124] mt-1">
+                  {item.culture} Specialties
+                </h3>
+                <p className="text-xs text-[#716B71] mt-1 line-clamp-2">
+                  {item.desc}
+                </p>
               </div>
-
-              {/* Card Body */}
-              <div className="p-4 flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <h3 className="font-heading font-bold text-base text-[#242124] group-hover:text-[#30102F] transition-colors">
-                      {rest.name}
-                    </h3>
-                  </div>
-                  <p className="text-xs text-[#716B71] line-clamp-1">{rest.tagline}</p>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-[#EAE5E9] flex items-center justify-between text-xs text-[#716B71]">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-[#30102F]" />
-                    <span>{rest.deliveryTimeMin}–{rest.deliveryTimeMax} mins</span>
-                  </div>
-                  <div className="font-medium text-[#242124]">
-                    Delivery: ₦{rest.deliveryFee.toLocaleString()}
-                  </div>
-                </div>
-
-                {/* Verified badge */}
-                <div className="mt-2 text-[10px] text-[#287A55] font-semibold flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#287A55]" />
-                  <span>{rest.verified.verificationText}</span>
-                </div>
+              <div className="mt-3 pt-2 border-t border-[#EAE5E9] flex items-center justify-between text-xs font-bold text-[#30102F]">
+                <span>Discover dishes</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Popular Authentic Dishes */}
+      {/* 5. Recommended Prepared Meals (Section 2) */}
       <section>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="font-heading font-bold text-lg sm:text-xl text-[#242124]">
-              Top Food Selections
+            <h2 className="font-heading font-bold text-base sm:text-lg text-[#242124]">
+              Recommended for {customerName}
             </h2>
             <p className="text-xs text-[#716B71]">
-              Customer favourites cooked to order with authentic spices
+              Prepared fresh to order based on your Food Memory and spice preferences
             </p>
           </div>
+          <button
+            onClick={() => setCustomerTab('explore')}
+            className="text-xs font-bold text-[#30102F] hover:underline"
+          >
+            View Full Menu
+          </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {menuItems.slice(0, 6).map((item) => (
             <div
               key={item.id}
-              className="p-4 rounded-2xl bg-white border border-[#EAE5E9] hover:border-[#30102F]/30 hover:shadow-sm transition-all flex gap-3.5"
+              className="p-4 rounded-2xl bg-white border border-[#EAE5E9] hover:border-[#30102F]/30 hover:shadow-xs transition-all flex gap-3.5"
             >
               <img
                 src={item.imageUrl}
                 alt={item.name}
                 referrerPolicy="no-referrer"
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover shrink-0 bg-[#FAF8F4]"
+                className="w-20 h-20 sm:w-22 sm:h-22 rounded-xl object-cover shrink-0 bg-[#FAF8F4]"
               />
-              <div className="flex-1 flex flex-col justify-between">
+              <div className="flex-1 flex flex-col justify-between min-w-0">
                 <div>
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="font-heading font-bold text-sm text-[#242124] line-clamp-1">
-                      {item.name}
-                    </h3>
-                  </div>
-                  <p className="text-[11px] text-[#716B71]">{item.restaurantName}</p>
-                  <p className="text-xs text-[#242124]/80 mt-1 line-clamp-2">
+                  <h3 className="font-heading font-bold text-xs sm:text-sm text-[#242124] truncate">
+                    {item.name}
+                  </h3>
+                  <button
+                    onClick={() => setSelectedRestaurantId(item.restaurantId)}
+                    className="text-[11px] text-[#716B71] hover:text-[#30102F] hover:underline block truncate mt-0.5"
+                  >
+                    {item.restaurantName}
+                  </button>
+                  <p className="text-[11px] text-[#242124]/75 mt-0.5 line-clamp-1">
                     {item.description}
                   </p>
                 </div>
 
                 <div className="mt-2 flex items-center justify-between">
-                  <span className="font-bold text-sm text-[#30102F] tabular-nums">
+                  <span className="font-bold text-xs sm:text-sm text-[#30102F] tabular-nums">
                     ₦{item.price.toLocaleString()}
                   </span>
                   <button
@@ -331,6 +393,75 @@ export const HomeView: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* 6. Chopwize Market & Decision Support Tools */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Chopwize Market banner */}
+        <div
+          onClick={() => setCustomerTab('explore')}
+          className="p-5 rounded-2xl bg-white border border-[#EAE5E9] hover:border-[#287A55]/40 hover:shadow-xs cursor-pointer transition-all flex flex-col justify-between"
+        >
+          <div>
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-[#287A55] flex items-center justify-center mb-3">
+              <ShoppingCart className="w-5 h-5 text-[#287A55]" />
+            </div>
+            <h3 className="font-heading font-bold text-sm text-[#242124]">
+              Chopwize Market
+            </h3>
+            <p className="text-xs text-[#716B71] mt-1 leading-relaxed">
+              Shop shelf-stable groceries with single-store consolidation. Spaghetti, noodles, rice, and cooking oils.
+            </p>
+          </div>
+          <div className="mt-4 pt-2 border-t border-[#EAE5E9] flex items-center justify-between text-xs font-bold text-[#287A55]">
+            <span>Open Market</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </div>
+        </div>
+
+        {/* Cooking Assistant */}
+        <div
+          onClick={() => setIsCookingAssistantOpen(true)}
+          className="p-5 rounded-2xl bg-white border border-[#EAE5E9] hover:border-[#30102F]/40 hover:shadow-xs cursor-pointer transition-all flex flex-col justify-between"
+        >
+          <div>
+            <div className="w-9 h-9 rounded-xl bg-[#FAF3F9] text-[#30102F] flex items-center justify-center mb-3">
+              <ChefHat className="w-5 h-5 text-[#CBB477]" />
+            </div>
+            <h3 className="font-heading font-bold text-sm text-[#242124]">
+              Cooking Assistant
+            </h3>
+            <p className="text-xs text-[#716B71] mt-1 leading-relaxed">
+              Have rice, pepper, or yam at home? Suggest Nigerian recipes and get missing items from the Market.
+            </p>
+          </div>
+          <div className="mt-4 pt-2 border-t border-[#EAE5E9] flex items-center justify-between text-xs font-bold text-[#30102F]">
+            <span>Check Recipes</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </div>
+        </div>
+
+        {/* Surprise Me Dice */}
+        <div
+          onClick={() => setIsSurpriseMeOpen(true)}
+          className="p-5 rounded-2xl bg-white border border-[#EAE5E9] hover:border-[#30102F]/40 hover:shadow-xs cursor-pointer transition-all flex flex-col justify-between"
+        >
+          <div>
+            <div className="w-9 h-9 rounded-xl bg-[#FAF3F9] text-[#30102F] flex items-center justify-center mb-3">
+              <Dices className="w-5 h-5 text-[#CBB477]" />
+            </div>
+            <h3 className="font-heading font-bold text-sm text-[#242124]">
+              Instant Surprise Me
+            </h3>
+            <p className="text-xs text-[#716B71] mt-1 leading-relaxed">
+              Can't decide? Set budget and spice tolerance to roll verified meal recommendations instantly.
+            </p>
+          </div>
+          <div className="mt-4 pt-2 border-t border-[#EAE5E9] flex items-center justify-between text-xs font-bold text-[#30102F]">
+            <span>Roll Meal Dice</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </div>
         </div>
       </section>
 
